@@ -132,3 +132,26 @@ components/
 - **State Management**
   - **Zustand** reserved for ephemeral UI state (drag order, modal visibility)
   - All persistent data lives exclusively in React Query’s cache—no double sources
+
+## 6. Critical UI Views & Functions
+
+| Scope                          | View / Feature              | Why it matters                                       | Core Interactions                                            |
+| ------------------------------ | --------------------------- | ---------------------------------------------------- | ------------------------------------------------------------ |
+| **Global Shell**               | **Auth-gated App Layout**   | Single nav + providers; baseline for everything else | Sidebar project list, topbar command bar trigger             |
+|                                | **Command Bar (⌘-K)**       | Fast jump + create anywhere                          | Fuzzy search artifacts, quick actions (new task/doc/project) |
+|                                | **Notifications Drawer**    | Surface mentions / due dates                         | Read, mark-as-done, deep-link                                |
+| **Personal**                   | **Dashboard (Home)**        | Cross-project snapshot                               | Today’s tasks, recently edited docs, activity feed           |
+| **Projects Index**             | **All Projects Table/Grid** | Find or create projects                              | Sort, tag filter, pin, bulk archive                          |
+| **Project Shell**              | **Project Overview**        | At-a-glance health                                   | Key metrics, recent artifacts, project settings link         |
+|                                | **Project Settings**        | Roles, labels, webhooks                              | Invite, role change, delete                                  |
+| **Workstreams**                | **Tasks View**              | Kanban or list, drag reorder                         | Create/edit, status change, label filter, due-date set       |
+|                                | **Task Detail Panel**       | Deep info without nav away                           | Description, subtasks, comments, file uploads                |
+|                                | **Docs View**               | Rich-text & MDX editor                               | Inline slash commands, version history                       |
+|                                | **Assets View**             | File grid / list                                     | Upload, preview, tag, relate to tasks                        |
+|                                | **Timeline / Calendar**     | Time allocation                                      | Gantt bars, drag-resize, jump to artifact                    |
+| **Cross-Cutting**              | **@modal Parallel Route**   | URL-addressable modals                               | Project create/edit, task quick-create                       |
+|                                | **Inspector Drawer**        | Edit artifact in context                             | Appears on right, optimistic save                            |
+| **Search & Filter**            | **Global Search Page**      | Advanced queries                                     | Boolean, tag, date range, export                             |
+| **Mobile Fallback (optional)** | **Responsive Collapse**     | Quick triage on phone                                | Basic list views, command bar still works                    |
+| **Admin**                      | **Workspace Billing**       | Seat & usage view                                    | Upgrade, cancel, invoices                                    |
+|                                | **API Keys Page**           | External automations                                 | Generate/revoke, docs link                                   |
