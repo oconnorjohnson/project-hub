@@ -89,6 +89,20 @@ components/
   - shadcn components automatically adapt to theme via CSS custom properties
   - Theme toggle component available in layout for user preference
 
+- **Rich Text Editor (Tip Tap)**
+
+  - Free/open source editor for writing notes and documentation
+  - Extensible with plugins for formatting, tables, code blocks, etc.
+  - Integrates seamlessly with React components and Tailwind styling
+  - Outputs structured JSON for consistent data storage
+
+- **Live Collaboration (PartyKit)**
+
+  - Real-time collaborative editing in docs workstream
+  - WebSocket-based synchronization for multiple users
+  - Conflict resolution and operational transforms handled automatically
+  - Presence indicators show who's currently editing
+
 ## 5. Data & API Layer
 
 - **Database (Supabase Postgres + Drizzle ORM)**
