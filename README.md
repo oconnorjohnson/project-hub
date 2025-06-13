@@ -1,36 +1,120 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Next.js Project Hub – Routing & Layout Blueprint
 
-## Getting Started
+## 1. Core Mental Model
 
-First, run the development server:
+| **Concept**    | **Purpose**                                                             | **1-sentence rule of thumb**                               |
+| -------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------- |
+| **Workspace**  | Your personal “org” (you alone or you + collaborators).                 | One workspace per real-world company or persona.           |
+| **Project**    | A discrete initiative (film, robotics build, screenplay, SaaS feature). | Never nest projects—use tags for “sub-projects.”           |
+| **Workstream** | A lens on the same data (Tasks, Docs, Assets, Timeline).                | Every project exposes the same set of workstreams.         |
+| **Artifact**   | Smallest CRUD thing (task, doc, asset, calendar event).                 | Belongs to exactly one project, referenced globally by ID. |
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Everything in routing and RBAC flows from these four nouns.
+
+---
+
+## 2. Recommended App Router Layout (Next 14)
+
+<details>
+<summary>Directory tree</summary>
+
+```text
+app/
+  (marketing)/
+    page.tsx
+    pricing/page.tsx
+  (app)/
+    layout.tsx               ← Global nav + Zustand providers
+    page.tsx                 ← Personal dashboard
+    projects/
+      layout.tsx             ← Project sidebar + breadcrumbs
+      page.tsx               ← “All projects” list
+      [projectId]/
+        loading.tsx
+        page.tsx             ← Project overview
+        actions/             ← Stored server actions
+        @modal/              ← Parallel route for slide-overs
+        tasks/
+          page.tsx
+          [taskId]/page.tsx
+        docs/
+          page.tsx
+          [docId]/page.tsx
+        assets/
+          page.tsx
+        timeline/
+          page.tsx
+    settings/
+    api/                      ← Route handlers / tRPC
+lib/
+components/
+  ui/
+  layout/
+  modals/
+  widgets/
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+</details>
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Why this structure?
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Route groups `(marketing)` vs `(app)` keep public pages out of the auth bundle.
+2. Single `[projectid]` segment nests all workstreams, simplifying deep-links and state.
+3. Parallel route `@modal` gives URL-addressable slide-overs/command-K without hacks.
+4. Project layout streams meta once; children lazy load.
 
-## Learn More
+## 3. Navigation & UX Patterns
 
-To learn more about Next.js, take a look at the following resources:
+| Pattern                      | Implementation hint                                                       |
+| ---------------------------- | ------------------------------------------------------------------------- |
+| **Command Bar (⌘-K)**        | Parallel route + Radix Dialog; preload recent Projects & Actions via RSC. |
+| **Left Sidebar**             | Pinned or recent projects; filter by tag (film, code, hardware).          |
+| **Right Drawer (Inspector)** | Another parallel route for quick-edit of any Artifact.                    |
+| **Breadcrumbs**              | Derive from router segments for deep paths.                               |
+| **Theme**                    | next-themes + shadcn/ui CSS variables for seamless dark/light switching.  |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 4. UI Components & Theming
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Component Library (shadcn/ui)**
 
-## Deploy on Vercel
+  - All base components (Button, Dialog, Input, etc.) use shadcn/ui for consistency
+  - Components installed via CLI and live in `components/ui/`
+  - Built on Radix UI primitives with full accessibility and keyboard navigation
+  - Tailwind CSS utility classes provide styling foundation
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Dark/Light Theme (next-themes + shadcn)**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+  - `next-themes` handles theme switching and persistence
+  - CSS variables in `globals.css` define light/dark color tokens
+  - shadcn components automatically adapt to theme via CSS custom properties
+  - Theme toggle component available in layout for user preference
+
+## 5. Data & API Layer
+
+- **Database (Supabase Postgres + Drizzle ORM)**
+
+  - Tables: `workspace`, `user_workspace_role`
+  - `project` → FK to `workspace`
+  - `artifact` → FK to `project`, `type` enum (`TASK | DOC | ASSET | EVENT`)
+  - Junction tables for labels ↔ artifacts and participants ↔ artifacts
+  - Drizzle migrations tracked in `drizzle/` and applied via the Supabase CLI
+
+- **Auth (Clerk)**
+
+  - `ClerkProvider` wraps the client shell; components use `useUser` / `useAuth`
+  - API route handlers read `getAuth(req)` to inject `userId` & workspace claims
+
+- **API Layer**
+
+  - REST-ish route handlers in `app/api/**/route.ts` (no Server Actions)
+  - JSON schemas validated with Zod; uniform error envelope
+
+- **Data Fetching & Caching (TanStack React Query)**
+
+  - `QueryClientProvider` mounted at the root
+  - Fetch helpers in `lib/api.ts` attach Clerk JWT for auth
+  - React Query handles stale-while-revalidate, cache invalidation, and optimistic mutations
+
+- **State Management**
+  - **Zustand** reserved for ephemeral UI state (drag order, modal visibility)
+  - All persistent data lives exclusively in React Query’s cache—no double sources
