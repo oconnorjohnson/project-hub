@@ -1,11 +1,45 @@
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+"use client";
 
-export default async function DashboardPage() {
-  const { userId } = await auth();
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Plus,
+  FolderOpen,
+  Users,
+  Calendar,
+  TrendingUp,
+  Loader2,
+} from "lucide-react";
+import Link from "next/link";
+import { useProjects, useWorkspaces } from "@/hooks";
 
-  if (!userId) {
-    redirect("/sign-in");
+export default function DashboardPage() {
+  const { data: projects, isLoading: projectsLoading } = useProjects();
+  const { data: workspaces, isLoading: workspacesLoading } = useWorkspaces();
+
+  const isLoading = projectsLoading || workspacesLoading;
+
+  // Calculate stats from real data
+  const stats = {
+    totalProjects: projects?.length || 0,
+    activeProjects: projects?.filter((p) => !p.isArchived).length || 0,
+    totalWorkspaces: workspaces?.length || 0,
+    recentProjects: projects?.slice(0, 3) || [],
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
   }
 
   return (
@@ -13,53 +47,156 @@ export default async function DashboardPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <p className="text-muted-foreground">
-          Welcome back! Here's what's happening with your projects.
+          Welcome back! Here&apos;s what&apos;s happening with your projects.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Quick Stats */}
-        <div className="bg-card p-6 rounded-lg border">
-          <h3 className="font-semibold mb-2">Active Projects</h3>
-          <p className="text-3xl font-bold text-primary">0</p>
-          <p className="text-sm text-muted-foreground">No projects yet</p>
-        </div>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total Projects
+            </CardTitle>
+            <FolderOpen className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalProjects}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.activeProjects} active
+            </p>
+          </CardContent>
+        </Card>
 
-        <div className="bg-card p-6 rounded-lg border">
-          <h3 className="font-semibold mb-2">Tasks Due Today</h3>
-          <p className="text-3xl font-bold text-orange-500">0</p>
-          <p className="text-sm text-muted-foreground">All caught up!</p>
-        </div>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Active Projects
+            </CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.activeProjects}</div>
+            <p className="text-xs text-muted-foreground">
+              Currently in progress
+            </p>
+          </CardContent>
+        </Card>
 
-        <div className="bg-card p-6 rounded-lg border">
-          <h3 className="font-semibold mb-2">Recent Activity</h3>
-          <p className="text-3xl font-bold text-green-500">0</p>
-          <p className="text-sm text-muted-foreground">No recent updates</p>
-        </div>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Workspaces</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalWorkspaces}</div>
+            <p className="text-xs text-muted-foreground">Organizations</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Recent Projects
+            </CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {stats.recentProjects.length}
+            </div>
+            <p className="text-xs text-muted-foreground">Last 3 projects</p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Getting Started */}
-      <div className="mt-8 bg-card p-6 rounded-lg border">
-        <h2 className="text-xl font-semibold mb-4">Getting Started</h2>
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-2 bg-primary rounded-full"></div>
-            <span>Create your first project to organize your work</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-2 bg-muted rounded-full"></div>
-            <span className="text-muted-foreground">
-              Add tasks and documents to your project
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-2 bg-muted rounded-full"></div>
-            <span className="text-muted-foreground">
-              Collaborate with your team
-            </span>
-          </div>
-        </div>
-      </div>
+      {/* Recent Projects */}
+      {stats.recentProjects.length > 0 ? (
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Recent Projects</CardTitle>
+            <CardDescription>
+              Your most recently created projects
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {stats.recentProjects.map((project) => (
+                <div
+                  key={project.id}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
+                  <div className="flex-1">
+                    <h3 className="font-semibold">{project.name}</h3>
+                    {project.description && (
+                      <p className="text-sm text-muted-foreground">
+                        {project.description}
+                      </p>
+                    )}
+                    <div className="flex gap-2 mt-2">
+                      {project.tags.map((tag) => (
+                        <Badge key={tag} variant="secondary">
+                          {tag}
+                        </Badge>
+                      ))}
+                      {project.isArchived && (
+                        <Badge variant="outline">Archived</Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {new Date(project.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4">
+              <Button asChild>
+                <Link href="/projects">
+                  <FolderOpen className="mr-2 h-4 w-4" />
+                  View All Projects
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        /* Getting Started */
+        <Card>
+          <CardHeader>
+            <CardTitle>Getting Started</CardTitle>
+            <CardDescription>
+              Create your first project to get started
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-primary rounded-full"></div>
+                <span>Create your first project to organize your work</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-muted rounded-full"></div>
+                <span className="text-muted-foreground">
+                  Add tasks and documents to your project
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-muted rounded-full"></div>
+                <span className="text-muted-foreground">
+                  Collaborate with your team
+                </span>
+              </div>
+            </div>
+            <Button asChild>
+              <Link href="/projects">
+                <Plus className="mr-2 h-4 w-4" />
+                Create First Project
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
