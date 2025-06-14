@@ -38,8 +38,10 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <Topbar />
-            {children}
+            <QueryProvider>
+              <Topbar />
+              {children}
+            </QueryProvider>
           </ThemeProvider>
         </body>
       </html>
