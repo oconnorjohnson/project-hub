@@ -119,9 +119,9 @@ export const projects = pgTable("projects", {
 // Artifacts table (tasks, docs, assets, events)
 export const artifacts = pgTable("artifacts", {
   id: uuid("id").defaultRandom().primaryKey(),
-  projectId: uuid("project_id")
-    .notNull()
-    .references(() => projects.id, { onDelete: "cascade" }),
+  projectId: uuid("project_id").references(() => projects.id, {
+    onDelete: "cascade",
+  }),
   type: artifactTypeEnum("type").notNull(),
   title: text("title").notNull(),
   content: jsonb("content"), // Flexible content storage (task details, doc content, etc.)
