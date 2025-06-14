@@ -5,9 +5,14 @@ import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
-const webhookSecret = process.env.CLERK_WEBHOOK_SECRET!;
+const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
 
 export async function POST(req: NextRequest) {
+  // Check if webhook secret is configured
+  if (!webhookSecret) {
+    console.error("CLERK_WEBHOOK_SECRET is not configured");
+    return new Response("Webhook secret not configured", { status: 500 });
+  }
   // Get the headers
   const svix_id = req.headers.get("svix-id");
   const svix_timestamp = req.headers.get("svix-timestamp");
