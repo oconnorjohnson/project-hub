@@ -6,7 +6,11 @@
     "dev": "next dev --turbopack --port 2000",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.21.0",
@@ -23,6 +27,7 @@
     "postgres": "^3.4.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "svix": "^1.67.0",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
