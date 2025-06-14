@@ -3,8 +3,10 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { WorkspaceProvider } from "@/components/providers/workspace-provider";
 import { Topbar } from "@/components/layout/topbar";
 import { Toaster } from "sonner";
+import { Provider as JotaiProvider } from "jotai";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -39,11 +41,15 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <QueryProvider>
-              <Topbar />
-              {children}
-              <Toaster />
-            </QueryProvider>
+            <JotaiProvider>
+              <QueryProvider>
+                <WorkspaceProvider>
+                  <Topbar />
+                  {children}
+                  <Toaster />
+                </WorkspaceProvider>
+              </QueryProvider>
+            </JotaiProvider>
           </ThemeProvider>
         </body>
       </html>

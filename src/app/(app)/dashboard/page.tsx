@@ -166,32 +166,65 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle>Getting Started</CardTitle>
             <CardDescription>
-              Create your first project to get started
+              {!workspaces || workspaces.length === 0
+                ? "Create your first workspace to get started"
+                : "Create your first project to get started"}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-primary rounded-full"></div>
-                <span>Create your first project to organize your work</span>
+            {!workspaces || workspaces.length === 0 ? (
+              /* No Workspaces - Show workspace creation flow */
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+                  <span>Create your first workspace to organize your work</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-muted rounded-full"></div>
+                  <span className="text-muted-foreground">
+                    Add projects to your workspace
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-muted rounded-full"></div>
+                  <span className="text-muted-foreground">
+                    Collaborate with your team
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-muted rounded-full"></div>
-                <span className="text-muted-foreground">
-                  Add tasks and documents to your project
-                </span>
+            ) : (
+              /* Has Workspaces but no Projects - Show project creation flow */
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
+                  <span>Create your first project to organize your work</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-muted rounded-full"></div>
+                  <span className="text-muted-foreground">
+                    Add tasks and documents to your project
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-muted rounded-full"></div>
+                  <span className="text-muted-foreground">
+                    Collaborate with your team
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-muted rounded-full"></div>
-                <span className="text-muted-foreground">
-                  Collaborate with your team
-                </span>
-              </div>
-            </div>
+            )}
             <Button asChild>
-              <Link href="/projects">
+              <Link
+                href={
+                  !workspaces || workspaces.length === 0
+                    ? "/workspaces"
+                    : "/projects"
+                }
+              >
                 <Plus className="mr-2 h-4 w-4" />
-                Create First Project
+                {!workspaces || workspaces.length === 0
+                  ? "Create First Workspace"
+                  : "Create First Project"}
               </Link>
             </Button>
           </CardContent>
