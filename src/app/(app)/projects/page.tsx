@@ -51,6 +51,7 @@ import {
 import { toast } from "sonner";
 import { useAtom } from "jotai";
 import { currentWorkspaceAtom } from "@/lib/stores/workspace";
+import { generateSlug } from "@/lib/utils";
 
 export default function ProjectsPage() {
   const [currentWorkspace] = useAtom(currentWorkspaceAtom);
@@ -66,10 +67,28 @@ export default function ProjectsPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [isCreatingWorkspace, setIsCreatingWorkspace] = useState(false);
 
+  // State for auto-generating slugs
+  const [projectName, setProjectName] = useState("");
+  const [projectSlug, setProjectSlug] = useState("");
+  const [workspaceName, setWorkspaceName] = useState("");
+  const [workspaceSlug, setWorkspaceSlug] = useState("");
+
   const isLoading = projectsLoading || workspacesLoading;
 
   // Don't allow project creation if no workspace is selected
   const canCreateProject = currentWorkspace !== null;
+
+  // Auto-generate project slug when name changes
+  const handleProjectNameChange = (name: string) => {
+    setProjectName(name);
+    setProjectSlug(generateSlug(name));
+  };
+
+  // Auto-generate workspace slug when name changes
+  const handleWorkspaceNameChange = (name: string) => {
+    setWorkspaceName(name);
+    setWorkspaceSlug(generateSlug(name));
+  };
 
   const handleCreateWorkspace = async (formData: FormData) => {
     setIsCreatingWorkspace(true);
@@ -86,6 +105,9 @@ export default function ProjectsPage() {
 
       toast.success("Workspace created successfully!");
       setIsCreateWorkspaceDialogOpen(false);
+      // Reset form state
+      setWorkspaceName("");
+      setWorkspaceSlug("");
     } catch (error) {
       toast.error("Failed to create workspace. Please try again.");
       console.error("Error creating workspace:", error);
@@ -124,6 +146,9 @@ export default function ProjectsPage() {
 
       toast.success("Project created successfully!");
       setIsCreateDialogOpen(false);
+      // Reset form state
+      setProjectName("");
+      setProjectSlug("");
     } catch (error) {
       toast.error("Failed to create project. Please try again.");
       console.error("Error creating project:", error);
@@ -174,6 +199,8 @@ export default function ProjectsPage() {
                     <Input
                       id="name"
                       name="name"
+                      value={projectName}
+                      onChange={(e) => handleProjectNameChange(e.target.value)}
                       placeholder="Enter project name"
                       required
                     />
@@ -183,11 +210,16 @@ export default function ProjectsPage() {
                     <Input
                       id="slug"
                       name="slug"
+                      value={projectSlug}
+                      onChange={(e) => setProjectSlug(e.target.value)}
                       placeholder="project-slug"
                       pattern="^[a-z0-9-]+$"
                       title="Only lowercase letters, numbers, and hyphens allowed"
                       required
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Auto-generated from project name. You can edit if needed.
+                    </p>
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="workspaceId">Workspace</Label>
@@ -266,6 +298,8 @@ export default function ProjectsPage() {
                   <Input
                     id="workspace-name"
                     name="name"
+                    value={workspaceName}
+                    onChange={(e) => handleWorkspaceNameChange(e.target.value)}
                     placeholder="Enter workspace name"
                     required
                   />
@@ -275,11 +309,16 @@ export default function ProjectsPage() {
                   <Input
                     id="workspace-slug"
                     name="slug"
+                    value={workspaceSlug}
+                    onChange={(e) => setWorkspaceSlug(e.target.value)}
                     placeholder="workspace-slug"
                     pattern="^[a-z0-9-]+$"
                     title="Only lowercase letters, numbers, and hyphens allowed"
                     required
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Auto-generated from workspace name. You can edit if needed.
+                  </p>
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="workspace-description">
