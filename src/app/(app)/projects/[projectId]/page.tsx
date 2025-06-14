@@ -14,6 +14,7 @@ import {
   Tag,
   Trash2,
   Users,
+  CheckSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +44,8 @@ import {
   Project,
   Workspace,
 } from "@/lib/types";
+import { useTasks } from "@/hooks/use-tasks";
+import { CreateTaskDialog } from "@/components/tasks/create-task-dialog";
 
 const getReferenceTypeColor = (type: ProjectReferenceType) => {
   switch (type) {
@@ -235,6 +238,7 @@ export default function ProjectDetailPage() {
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="tasks">Tasks</TabsTrigger>
           <TabsTrigger value="references">
             References
             {references &&
@@ -332,6 +336,10 @@ export default function ProjectDetailPage() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="tasks" className="space-y-6">
+          <ProjectTasksSection projectId={projectId} />
         </TabsContent>
 
         <TabsContent value="references" className="space-y-6">
@@ -516,6 +524,152 @@ export default function ProjectDetailPage() {
           </Card>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function ProjectTasksSection({ projectId }: { projectId: string }) {
+  const { data: tasks, isLoading } = useTasks({ projectId });
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "TODO":
+        return "bg-gray-100 text-gray-800 border-gray-200";
+      case "IN_PROGRESS":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "IN_REVIEW":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "DONE":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "CANCELLED":
+        return "bg-red-100 text-red-800 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "LOW":
+        return "bg-green-100 text-green-800";
+      case "MEDIUM":
+        return "bg-yellow-100 text-yellow-800";
+      case "HIGH":
+        return "bg-orange-100 text-orange-800";
+      case "URGENT":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold">Project Tasks</h3>
+          <p className="text-sm text-muted-foreground">
+            Manage tasks specific to this project
+          </p>
+        </div>
+        <CreateTaskDialog projectId={projectId} />
+      </div>
+
+      {tasks && tasks.length > 0 ? (
+        <div className="space-y-4">
+          {tasks.map((task) => (
+            <Card key={task.id} className="p-4">
+              <div className="flex items-start justify-between">
+                <div className="space-y-2 flex-1">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-medium">{task.title}</h4>
+                    <Badge
+                      className={getStatusColor(
+                        (task.metadata as any)?.status || "TODO"
+                      )}
+                    >
+                      {(task.metadata as any)?.status || "TODO"}
+                    </Badge>
+                    <Badge
+                      className={getPriorityColor(
+                        (task.metadata as any)?.priority || "MEDIUM"
+                      )}
+                    >
+                      {(task.metadata as any)?.priority || "MEDIUM"}
+                    </Badge>
+                  </div>
+
+                  {(task.content as any)?.description && (
+                    <p className="text-sm text-muted-foreground">
+                      {(task.content as any).description}
+                    </p>
+                  )}
+
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span>
+                      Created {new Date(task.createdAt).toLocaleDateString()}
+                    </span>
+                    {(task.metadata as any)?.dueDate && (
+                      <span>
+                        Due{" "}
+                        {new Date(
+                          (task.metadata as any).dueDate
+                        ).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>Edit Task</DropdownMenuItem>
+                    <DropdownMenuItem>Mark Complete</DropdownMenuItem>
+                    <DropdownMenuItem className="text-destructive">
+                      Delete Task
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card className="p-8 text-center">
+          <div className="space-y-4">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
+              <CheckSquare className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <div>
+              <h3 className="font-medium">No tasks yet</h3>
+              <p className="text-sm text-muted-foreground">
+                Create your first task to get started with project management.
+              </p>
+            </div>
+            <CreateTaskDialog
+              projectId={projectId}
+              trigger={
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create First Task
+                </Button>
+              }
+            />
+          </div>
+        </Card>
+      )}
     </div>
   );
 }
