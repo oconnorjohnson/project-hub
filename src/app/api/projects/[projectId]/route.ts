@@ -27,6 +27,7 @@ async function checkProjectAccess(
   const projectWithRole = await db
     .select({
       project: projects,
+      workspace: workspaces,
       userRole: userWorkspaceRoles.role,
     })
     .from(projects)
@@ -44,13 +45,13 @@ async function checkProjectAccess(
     return null;
   }
 
-  const { project, userRole } = projectWithRole[0];
+  const { project, workspace, userRole } = projectWithRole[0];
 
   if (requiredRole && !requiredRole.includes(userRole)) {
     return null;
   }
 
-  return { project, userRole };
+  return { project, workspace, userRole };
 }
 
 // GET /api/projects/[projectId] - Get single project
@@ -73,11 +74,12 @@ export async function GET(
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    const { project, userRole } = result;
+    const { project, workspace, userRole } = result;
 
     return NextResponse.json({
       data: {
         ...project,
+        workspace,
         userRole,
       },
       success: true,

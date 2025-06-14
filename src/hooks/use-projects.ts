@@ -14,7 +14,7 @@ export const projectKeys = {
   detail: (id: string) => [...projectKeys.details(), id] as const,
 };
 
-// Get all projects for current user
+// Get all projects for current user (optionally filtered by workspace)
 export function useProjects(workspaceId?: string) {
   return useQuery({
     queryKey: projectKeys.list(workspaceId),

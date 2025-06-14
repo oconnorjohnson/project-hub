@@ -55,7 +55,7 @@ async function checkProjectAccess(
 // GET /api/projects/[projectId]/references - Get project references
 export async function GET(
   req: NextRequest,
-  { params }: { params: { projectId: string } }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -64,7 +64,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { projectId } = params;
+    const { projectId } = await params;
 
     // Check project access
     const projectAccess = await checkProjectAccess(projectId, userId);
@@ -166,7 +166,7 @@ export async function GET(
 // POST /api/projects/[projectId]/references - Create project reference
 export async function POST(
   req: NextRequest,
-  { params }: { params: { projectId: string } }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -175,7 +175,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { projectId } = params;
+    const { projectId } = await params;
     const body = await req.json();
     const validatedData = createProjectReferenceSchema.parse(body);
 

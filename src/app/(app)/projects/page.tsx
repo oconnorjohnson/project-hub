@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   Plus,
   FolderOpen,
@@ -356,64 +357,67 @@ export default function ProjectsPage() {
       {projects && projects.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
-            <Card
-              key={project.id}
-              className="hover:shadow-md transition-shadow"
-            >
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{project.name}</CardTitle>
-                    <CardDescription className="text-sm text-muted-foreground">
-                      {project.workspace.name}
-                    </CardDescription>
+            <Link key={project.id} href={`/projects/${project.id}`}>
+              <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg">{project.name}</CardTitle>
+                      <CardDescription className="text-sm text-muted-foreground">
+                        {project.workspace.name}
+                      </CardDescription>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => e.preventDefault()} // Prevent navigation when clicking dropdown
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <DropdownMenuItem>
+                          {project.isArchived ? "Unarchive" : "Archive"}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive">
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>
-                        {project.isArchived ? "Unarchive" : "Archive"}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {project.description && (
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {project.description}
-                  </p>
-                )}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {project.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary">
-                      {tag}
-                    </Badge>
-                  ))}
-                  {project.isArchived && (
-                    <Badge variant="outline">Archived</Badge>
+                </CardHeader>
+                <CardContent>
+                  {project.description && (
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {project.description}
+                    </p>
                   )}
-                </div>
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {new Date(project.createdAt).toLocaleDateString()}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {project.tags.map((tag) => (
+                      <Badge key={tag} variant="secondary">
+                        {tag}
+                      </Badge>
+                    ))}
+                    {project.isArchived && (
+                      <Badge variant="outline">Archived</Badge>
+                    )}
                   </div>
-                  <div className="flex items-center gap-1">
-                    <FolderOpen className="h-3 w-3" />
-                    View
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {new Date(project.createdAt).toLocaleDateString()}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <FolderOpen className="h-3 w-3" />
+                      View Project
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       ) : (

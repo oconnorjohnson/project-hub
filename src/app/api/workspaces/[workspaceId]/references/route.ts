@@ -48,7 +48,7 @@ async function checkWorkspaceAccess(
 // GET /api/workspaces/[workspaceId]/references - Get workspace references
 export async function GET(
   req: NextRequest,
-  { params }: { params: { workspaceId: string } }
+  { params }: { params: Promise<{ workspaceId: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -57,7 +57,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { workspaceId } = params;
+    const { workspaceId } = await params;
 
     // Check workspace access
     const userRole = await checkWorkspaceAccess(workspaceId, userId);
@@ -151,7 +151,7 @@ export async function GET(
 // POST /api/workspaces/[workspaceId]/references - Create workspace reference
 export async function POST(
   req: NextRequest,
-  { params }: { params: { workspaceId: string } }
+  { params }: { params: Promise<{ workspaceId: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -160,7 +160,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { workspaceId } = params;
+    const { workspaceId } = await params;
     const body = await req.json();
     const validatedData = createWorkspaceReferenceSchema.parse(body);
 
