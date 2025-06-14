@@ -442,8 +442,8 @@ export default function WorkspacesPage() {
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the
-              workspace "{workspaceToDelete?.name}" and all associated projects
-              and data.
+              workspace &quot;{workspaceToDelete?.name}&quot; and all associated
+              projects and data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
