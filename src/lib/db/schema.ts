@@ -192,10 +192,52 @@ export const crossWorkspacePermissions = pgTable(
   }
 );
 
+// Documents table for notes system
+export const documents = pgTable("documents", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: text("title").notNull(),
+  content: jsonb("content").notNull().default({}), // TipTap JSON content
+  projectId: uuid("project_id").references(() => projects.id, {
+    onDelete: "set null",
+  }),
+  createdBy: text("created_by")
+    .notNull()
+    .references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Document locks table for edit session management
+export const documentLocks = pgTable("document_locks", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  documentId: uuid("document_id")
+    .notNull()
+    .references(() => documents.id, { onDelete: "cascade" }),
+  lockedBy: text("locked_by").notNull(), // Session ID or user identifier
+  lockedAt: timestamp("locked_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
+// Document versions table for version history
+export const documentVersions = pgTable("document_versions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  documentId: uuid("document_id")
+    .notNull()
+    .references(() => documents.id, { onDelete: "cascade" }),
+  content: jsonb("content").notNull(),
+  versionNumber: text("version_number").notNull(), // Using text for semantic versioning
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdBy: text("created_by")
+    .notNull()
+    .references(() => users.id),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   workspaceRoles: many(userWorkspaceRoles),
   createdArtifacts: many(artifacts),
+  createdDocuments: many(documents),
+  createdDocumentVersions: many(documentVersions),
 }));
 
 export const workspacesRelations = relations(workspaces, ({ many }) => ({
@@ -235,6 +277,7 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
     references: [workspaces.id],
   }),
   artifacts: many(artifacts),
+  documents: many(documents),
   outgoingReferences: many(projectReferences, {
     relationName: "sourceProject",
   }),
@@ -314,6 +357,41 @@ export const crossWorkspacePermissionsRelations = relations(
     }),
     grantedByUser: one(users, {
       fields: [crossWorkspacePermissions.grantedBy],
+      references: [users.id],
+    }),
+  })
+);
+
+// Document relations
+export const documentsRelations = relations(documents, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [documents.projectId],
+    references: [projects.id],
+  }),
+  createdBy: one(users, {
+    fields: [documents.createdBy],
+    references: [users.id],
+  }),
+  locks: many(documentLocks),
+  versions: many(documentVersions),
+}));
+
+export const documentLocksRelations = relations(documentLocks, ({ one }) => ({
+  document: one(documents, {
+    fields: [documentLocks.documentId],
+    references: [documents.id],
+  }),
+}));
+
+export const documentVersionsRelations = relations(
+  documentVersions,
+  ({ one }) => ({
+    document: one(documents, {
+      fields: [documentVersions.documentId],
+      references: [documents.id],
+    }),
+    createdBy: one(users, {
+      fields: [documentVersions.createdBy],
       references: [users.id],
     }),
   })

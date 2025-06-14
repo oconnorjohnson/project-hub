@@ -1,21 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Calendar,
-  Clock,
-  Flag,
-  User,
-  Edit,
-  Trash2,
-  CheckCircle,
-} from "lucide-react";
+import { Calendar, Clock, Flag, Edit, Trash2, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,

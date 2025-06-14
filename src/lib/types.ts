@@ -279,3 +279,83 @@ export interface CreateCrossWorkspacePermissionData {
   accessLevel: AccessLevel;
   expiresAt?: Date;
 }
+
+// Document types for notes system
+export interface Document {
+  id: string;
+  title: string;
+  content: JSONContent; // TipTap JSON content
+  projectId?: string;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface DocumentWithProject extends Document {
+  project?: Project;
+}
+
+export interface DocumentLock {
+  id: string;
+  documentId: string;
+  lockedBy: string;
+  lockedAt: Date;
+  expiresAt: Date;
+}
+
+export interface DocumentVersion {
+  id: string;
+  documentId: string;
+  content: JSONContent;
+  versionNumber: string;
+  createdAt: Date;
+  createdBy: string;
+}
+
+export interface DocumentWithLock extends Document {
+  lock?: DocumentLock;
+  isLocked: boolean;
+  canEdit: boolean;
+}
+
+// TipTap JSON content type
+export interface JSONContent {
+  type?: string;
+  attrs?: Record<string, any>;
+  content?: JSONContent[];
+  marks?: {
+    type: string;
+    attrs?: Record<string, any>;
+  }[];
+  text?: string;
+}
+
+// Document creation and update types
+export interface CreateDocumentData {
+  title: string;
+  content?: JSONContent;
+  projectId?: string;
+}
+
+export interface UpdateDocumentData {
+  title?: string;
+  content?: JSONContent;
+}
+
+// Document lock management types
+export interface DocumentLockStatus {
+  isLocked: boolean;
+  lockedBy?: string;
+  lockedAt?: Date;
+  expiresAt?: Date;
+  canEdit: boolean;
+}
+
+// Document filters for queries
+export interface DocumentFilters {
+  projectId?: string;
+  global?: boolean; // Documents not tied to any project
+  search?: string;
+  sortBy?: "title" | "createdAt" | "updatedAt";
+  sortOrder?: "asc" | "desc";
+}
