@@ -47,11 +47,15 @@ import {
   useWorkspaces,
   useCreateProject,
   useCreateWorkspace,
+  useCurrentWorkspace,
 } from "@/hooks";
 import { toast } from "sonner";
 
 export default function ProjectsPage() {
-  const { data: projects, isLoading: projectsLoading } = useProjects();
+  const { data: currentWorkspace } = useCurrentWorkspace();
+  const { data: projects, isLoading: projectsLoading } = useProjects(
+    currentWorkspace?.id
+  );
   const { data: workspaces, isLoading: workspacesLoading } = useWorkspaces();
   const { mutateAsync: createProject } = useCreateProject();
   const { mutateAsync: createWorkspace } = useCreateWorkspace();
@@ -138,7 +142,9 @@ export default function ProjectsPage() {
         <div>
           <h1 className="text-3xl font-bold">Projects</h1>
           <p className="text-muted-foreground">
-            Manage your projects and track progress across all initiatives.
+            {currentWorkspace
+              ? `Manage projects in ${currentWorkspace.name} workspace`
+              : "Manage your projects and track progress across all initiatives"}
           </p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -180,7 +186,11 @@ export default function ProjectsPage() {
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="workspaceId">Workspace</Label>
-                  <Select name="workspaceId" required>
+                  <Select
+                    name="workspaceId"
+                    required
+                    defaultValue={currentWorkspace?.id}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select workspace" />
                     </SelectTrigger>
