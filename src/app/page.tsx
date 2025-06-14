@@ -1,6 +1,15 @@
-import { SignedIn, SignedOut } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { SignedOut } from "@clerk/nextjs";
 
-export default function Home() {
+export default async function Home() {
+  const { userId } = await auth();
+
+  // Redirect authenticated users to dashboard
+  if (userId) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <SignedOut>
@@ -14,15 +23,6 @@ export default function Home() {
           </p>
         </div>
       </SignedOut>
-
-      <SignedIn>
-        <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">Dashboard</h1>
-          <p className="text-lg text-muted-foreground">
-            Welcome back! Your project hub is ready.
-          </p>
-        </div>
-      </SignedIn>
     </div>
   );
 }
