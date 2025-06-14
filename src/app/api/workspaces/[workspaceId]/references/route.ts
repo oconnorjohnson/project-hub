@@ -7,7 +7,7 @@ import {
   userWorkspaceRoles,
   users,
 } from "@/lib/db/schema";
-import { eq, and, or } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 
 const createWorkspaceReferenceSchema = z.object({

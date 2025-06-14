@@ -5,6 +5,35 @@ import { workspaces, projects, userWorkspaceRoles } from "@/lib/db/schema";
 import { eq, and, or, ilike, notInArray } from "drizzle-orm";
 import { z } from "zod";
 
+// Search result types
+interface SearchResultWorkspace {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  createdAt: Date;
+  userRole: string;
+  type: "workspace";
+}
+
+interface SearchResultProject {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  workspaceId: string;
+  createdAt: Date;
+  workspace: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  userRole: string;
+  type: "project";
+}
+
+type SearchResult = SearchResultWorkspace | SearchResultProject;
+
 const searchSchema = z.object({
   query: z.string().min(1, "Search query is required"),
   type: z.enum(["workspaces", "projects", "all"]).default("all"),
@@ -32,8 +61,8 @@ export async function GET(req: NextRequest) {
 
     const { query, type, excludeIds, limit } = validatedParams;
 
-    let workspaceResults: any[] = [];
-    let projectResults: any[] = [];
+    let workspaceResults: SearchResult[] = [];
+    let projectResults: SearchResult[] = [];
 
     // Search workspaces if requested
     if (type === "workspaces" || type === "all") {
@@ -66,7 +95,10 @@ export async function GET(req: NextRequest) {
         )
         .limit(Math.floor(limit / (type === "all" ? 2 : 1)));
 
-      workspaceResults = await workspaceQuery;
+      workspaceResults = (await workspaceQuery).map((result) => ({
+        ...result,
+        type: "workspace" as const,
+      }));
     }
 
     // Search projects if requested
@@ -107,7 +139,10 @@ export async function GET(req: NextRequest) {
         )
         .limit(Math.floor(limit / (type === "all" ? 2 : 1)));
 
-      projectResults = await projectQuery;
+      projectResults = (await projectQuery).map((result) => ({
+        ...result,
+        type: "project" as const,
+      }));
     }
 
     // Combine and sort results by relevance (name matches first, then description)
