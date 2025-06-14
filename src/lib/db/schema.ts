@@ -16,6 +16,30 @@ export const artifactTypeEnum = pgEnum("artifact_type", [
   "ASSET",
   "EVENT",
 ]);
+
+export const taskStatusEnum = pgEnum("task_status", [
+  "TODO",
+  "IN_PROGRESS",
+  "IN_REVIEW",
+  "DONE",
+  "CANCELLED",
+]);
+
+export const taskPriorityEnum = pgEnum("task_priority", [
+  "LOW",
+  "MEDIUM",
+  "HIGH",
+  "URGENT",
+]);
+
+export const eventTypeEnum = pgEnum("event_type", [
+  "MEETING",
+  "DEADLINE",
+  "MILESTONE",
+  "REMINDER",
+  "BLOCK", // Time blocking
+]);
+
 export const userRoleEnum = pgEnum("user_role", [
   "OWNER",
   "ADMIN",

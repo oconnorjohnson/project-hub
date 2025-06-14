@@ -40,7 +40,7 @@ export interface Project {
 
 export interface Artifact {
   id: string;
-  projectId: string;
+  projectId: string | null; // null for global items
   type: "TASK" | "DOC" | "ASSET" | "EVENT";
   title: string;
   content: Record<string, unknown>; // JSONB content
@@ -48,6 +48,95 @@ export interface Artifact {
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+// Task and Calendar specific types
+export type TaskStatus =
+  | "TODO"
+  | "IN_PROGRESS"
+  | "IN_REVIEW"
+  | "DONE"
+  | "CANCELLED";
+export type TaskPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+export type EventType =
+  | "MEETING"
+  | "DEADLINE"
+  | "MILESTONE"
+  | "REMINDER"
+  | "BLOCK";
+
+// Task content structure
+export interface TaskContent {
+  description?: string;
+  checklist?: Array<{
+    id: string;
+    text: string;
+    completed: boolean;
+  }>;
+  attachments?: Array<{
+    id: string;
+    name: string;
+    url: string;
+    type: string;
+  }>;
+}
+
+// Task metadata structure
+export interface TaskMetadata {
+  status: TaskStatus;
+  priority: TaskPriority;
+  dueDate?: string; // ISO date string
+  estimatedHours?: number;
+  actualHours?: number;
+  assignedTo?: string[]; // User IDs
+  tags?: string[];
+  parentTaskId?: string; // For subtasks
+  position?: number; // For kanban ordering
+}
+
+// Event content structure
+export interface EventContent {
+  description?: string;
+  location?: string;
+  meetingUrl?: string;
+  agenda?: string[];
+  attendees?: Array<{
+    userId: string;
+    status: "invited" | "accepted" | "declined" | "tentative";
+  }>;
+}
+
+// Event metadata structure
+export interface EventMetadata {
+  eventType: EventType;
+  startDate: string; // ISO datetime string
+  endDate?: string; // ISO datetime string
+  isAllDay: boolean;
+  recurrence?: {
+    frequency: "daily" | "weekly" | "monthly" | "yearly";
+    interval: number; // Every N days/weeks/months/years
+    endDate?: string;
+    daysOfWeek?: number[]; // 0-6, Sunday = 0
+  };
+  reminders?: Array<{
+    type: "email" | "notification";
+    minutesBefore: number;
+  }>;
+  color?: string; // Hex color for calendar display
+}
+
+// Typed artifact interfaces
+export interface Task extends Omit<Artifact, "type" | "content" | "metadata"> {
+  type: "TASK";
+  content: TaskContent;
+  metadata: TaskMetadata;
+}
+
+export interface CalendarEvent
+  extends Omit<Artifact, "type" | "content" | "metadata"> {
+  type: "EVENT";
+  content: EventContent;
+  metadata: EventMetadata;
 }
 
 // Extended types with relations
@@ -60,7 +149,17 @@ export interface WorkspaceWithRole extends Workspace {
 }
 
 export interface ArtifactWithProject extends Artifact {
-  project: Project;
+  project: Project | null; // null for global items
+  createdByUser: User;
+}
+
+export interface TaskWithProject extends Task {
+  project: Project | null;
+  createdByUser: User;
+}
+
+export interface CalendarEventWithProject extends CalendarEvent {
+  project: Project | null;
   createdByUser: User;
 }
 
@@ -80,11 +179,25 @@ export interface CreateProjectData {
 }
 
 export interface CreateArtifactData {
-  projectId: string;
+  projectId?: string; // Optional for global items
   type: "TASK" | "DOC" | "ASSET" | "EVENT";
   title: string;
   content?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
+}
+
+export interface CreateTaskData {
+  projectId?: string;
+  title: string;
+  content?: TaskContent;
+  metadata: TaskMetadata;
+}
+
+export interface CreateCalendarEventData {
+  projectId?: string;
+  title: string;
+  content?: EventContent;
+  metadata: EventMetadata;
 }
 
 // New reference types
