@@ -2,12 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus, Home, Settings, FolderOpen, Building2 } from "lucide-react";
+import {
+  Plus,
+  Home,
+  Settings,
+  FolderOpen,
+  Building2,
+  Calendar,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: Home },
+  { name: "Calendar & Tasks", href: "/calendar", icon: Calendar },
   { name: "Projects", href: "/projects", icon: FolderOpen },
   { name: "Workspaces", href: "/workspaces", icon: Building2 },
   { name: "Settings", href: "/settings", icon: Settings },
