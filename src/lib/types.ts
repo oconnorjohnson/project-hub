@@ -86,3 +86,83 @@ export interface CreateArtifactData {
   content?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
 }
+
+// New reference types
+export type WorkspaceReferenceType =
+  | "DEPENDENCY"
+  | "COLLABORATION"
+  | "PARENT_CHILD";
+export type ProjectReferenceType =
+  | "DEPENDENCY"
+  | "BLOCKS"
+  | "RELATED"
+  | "SUBTASK";
+export type AccessLevel = "read" | "reference" | "collaborate";
+
+export interface WorkspaceReference {
+  id: string;
+  sourceWorkspaceId: string;
+  targetWorkspaceId: string;
+  referenceType: WorkspaceReferenceType;
+  description?: string;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ProjectReference {
+  id: string;
+  sourceProjectId: string;
+  targetProjectId: string;
+  referenceType: ProjectReferenceType;
+  description?: string;
+  createdBy: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CrossWorkspacePermission {
+  id: string;
+  userId: string;
+  workspaceId: string;
+  grantedByWorkspaceId: string;
+  accessLevel: AccessLevel;
+  grantedBy: string;
+  createdAt: Date;
+  expiresAt?: Date;
+}
+
+// Extended types with references
+export interface WorkspaceWithReferences extends Workspace {
+  outgoingReferences: (WorkspaceReference & { targetWorkspace: Workspace })[];
+  incomingReferences: (WorkspaceReference & { sourceWorkspace: Workspace })[];
+}
+
+export interface ProjectWithReferences extends Project {
+  outgoingReferences: (ProjectReference & {
+    targetProject: Project & { workspace: Workspace };
+  })[];
+  incomingReferences: (ProjectReference & {
+    sourceProject: Project & { workspace: Workspace };
+  })[];
+}
+
+// Create data types for references
+export interface CreateWorkspaceReferenceData {
+  targetWorkspaceId: string;
+  referenceType: WorkspaceReferenceType;
+  description?: string;
+}
+
+export interface CreateProjectReferenceData {
+  targetProjectId: string;
+  referenceType: ProjectReferenceType;
+  description?: string;
+}
+
+export interface CreateCrossWorkspacePermissionData {
+  userId: string;
+  workspaceId: string;
+  accessLevel: AccessLevel;
+  expiresAt?: Date;
+}

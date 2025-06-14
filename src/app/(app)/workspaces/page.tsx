@@ -6,15 +6,19 @@ import {
   Building2,
   Users,
   Settings,
+  Trash2,
+  Edit,
   MoreHorizontal,
   Loader2,
-  Crown,
-  Shield,
-  User,
-  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,26 +39,38 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   useWorkspaces,
   useCreateWorkspace,
   useUpdateWorkspace,
   useDeleteWorkspace,
 } from "@/hooks";
 import { toast } from "sonner";
-import type { WorkspaceWithRole } from "@/lib/types";
+import { WorkspaceWithRole } from "@/lib/types";
+import { generateSlug } from "@/lib/utils";
 
-const roleIcons = {
-  OWNER: Crown,
-  ADMIN: Shield,
-  MEMBER: User,
-  VIEWER: Eye,
-};
-
-const roleColors = {
-  OWNER: "text-yellow-600",
-  ADMIN: "text-blue-600",
-  MEMBER: "text-green-600",
-  VIEWER: "text-gray-600",
+const getRoleBadgeVariant = (role: string) => {
+  switch (role) {
+    case "OWNER":
+      return "default";
+    case "ADMIN":
+      return "secondary";
+    case "MEMBER":
+      return "outline";
+    case "VIEWER":
+      return "outline";
+    default:
+      return "outline";
+  }
 };
 
 export default function WorkspacesPage() {
@@ -69,6 +85,27 @@ export default function WorkspacesPage() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [editingWorkspace, setEditingWorkspace] =
     useState<WorkspaceWithRole | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [workspaceToDelete, setWorkspaceToDelete] =
+    useState<WorkspaceWithRole | null>(null);
+
+  // State for auto-generating slugs
+  const [createName, setCreateName] = useState("");
+  const [createSlug, setCreateSlug] = useState("");
+  const [editName, setEditName] = useState("");
+  const [editSlug, setEditSlug] = useState("");
+
+  // Auto-generate create slug when name changes
+  const handleCreateNameChange = (name: string) => {
+    setCreateName(name);
+    setCreateSlug(generateSlug(name));
+  };
+
+  // Auto-generate edit slug when name changes
+  const handleEditNameChange = (name: string) => {
+    setEditName(name);
+    setEditSlug(generateSlug(name));
+  };
 
   const handleCreateWorkspace = async (formData: FormData) => {
     setIsCreating(true);
@@ -85,6 +122,9 @@ export default function WorkspacesPage() {
 
       toast.success("Workspace created successfully!");
       setIsCreateDialogOpen(false);
+      // Reset form state
+      setCreateName("");
+      setCreateSlug("");
     } catch (error) {
       toast.error("Failed to create workspace. Please try again.");
       console.error("Error creating workspace:", error);
@@ -104,12 +144,19 @@ export default function WorkspacesPage() {
 
       await updateWorkspace({
         id: editingWorkspace.id,
-        data: { name, slug, description },
+        data: {
+          name,
+          slug,
+          description,
+        },
       });
 
       toast.success("Workspace updated successfully!");
       setIsEditDialogOpen(false);
       setEditingWorkspace(null);
+      // Reset form state
+      setEditName("");
+      setEditSlug("");
     } catch (error) {
       toast.error("Failed to update workspace. Please try again.");
       console.error("Error updating workspace:", error);
@@ -118,21 +165,14 @@ export default function WorkspacesPage() {
     }
   };
 
-  const handleDeleteWorkspace = async (
-    workspaceId: string,
-    workspaceName: string
-  ) => {
-    if (
-      !confirm(
-        `Are you sure you want to delete "${workspaceName}"? This action cannot be undone.`
-      )
-    ) {
-      return;
-    }
+  const handleDeleteWorkspace = async () => {
+    if (!workspaceToDelete) return;
 
     try {
-      await deleteWorkspace(workspaceId);
+      await deleteWorkspace(workspaceToDelete.id);
       toast.success("Workspace deleted successfully!");
+      setDeleteDialogOpen(false);
+      setWorkspaceToDelete(null);
     } catch (error) {
       toast.error("Failed to delete workspace. Please try again.");
       console.error("Error deleting workspace:", error);
@@ -141,7 +181,14 @@ export default function WorkspacesPage() {
 
   const openEditDialog = (workspace: WorkspaceWithRole) => {
     setEditingWorkspace(workspace);
+    setEditName(workspace.name);
+    setEditSlug(workspace.slug);
     setIsEditDialogOpen(true);
+  };
+
+  const openDeleteDialog = (workspace: WorkspaceWithRole) => {
+    setWorkspaceToDelete(workspace);
+    setDeleteDialogOpen(true);
   };
 
   if (isLoading) {
@@ -158,7 +205,7 @@ export default function WorkspacesPage() {
         <div>
           <h1 className="text-3xl font-bold">Workspaces</h1>
           <p className="text-muted-foreground">
-            Manage your workspaces and collaborate with your team.
+            Manage your workspaces and collaborate with your team
           </p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -183,6 +230,8 @@ export default function WorkspacesPage() {
                   <Input
                     id="name"
                     name="name"
+                    value={createName}
+                    onChange={(e) => handleCreateNameChange(e.target.value)}
                     placeholder="Enter workspace name"
                     required
                   />
@@ -192,11 +241,16 @@ export default function WorkspacesPage() {
                   <Input
                     id="slug"
                     name="slug"
+                    value={createSlug}
+                    onChange={(e) => setCreateSlug(e.target.value)}
                     placeholder="workspace-slug"
                     pattern="^[a-z0-9-]+$"
                     title="Only lowercase letters, numbers, and hyphens allowed"
                     required
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Auto-generated from workspace name. You can edit if needed.
+                  </p>
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="description">Description (Optional)</Label>
@@ -231,34 +285,27 @@ export default function WorkspacesPage() {
       {/* Workspaces Grid */}
       {workspaces && workspaces.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {workspaces.map((workspace) => {
-            const RoleIcon = roleIcons[workspace.userRole.role];
-            const roleColor = roleColors[workspace.userRole.role];
-
-            return (
-              <Card
-                key={workspace.id}
-                className="hover:shadow-md transition-shadow"
-              >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Building2 className="h-5 w-5 text-muted-foreground" />
-                        <CardTitle className="text-lg">
-                          {workspace.name}
-                        </CardTitle>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">
-                          <RoleIcon className={`h-3 w-3 mr-1 ${roleColor}`} />
-                          {workspace.userRole.role}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          /{workspace.slug}
-                        </span>
-                      </div>
+          {workspaces.map((workspace) => (
+            <Card key={workspace.id} className="relative">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Building2 className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <CardTitle className="text-lg">
+                        {workspace.name}
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        /{workspace.slug}
+                      </p>
                     </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Badge
+                      variant={getRoleBadgeVariant(workspace.userRole.role)}
+                    >
+                      {workspace.userRole.role}
+                    </Badge>
                     {(workspace.userRole.role === "OWNER" ||
                       workspace.userRole.role === "ADMIN") && (
                       <DropdownMenu>
@@ -271,19 +318,15 @@ export default function WorkspacesPage() {
                           <DropdownMenuItem
                             onClick={() => openEditDialog(workspace)}
                           >
-                            <Settings className="h-4 w-4 mr-2" />
+                            <Edit className="h-4 w-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
                           {workspace.userRole.role === "OWNER" && (
                             <DropdownMenuItem
+                              onClick={() => openDeleteDialog(workspace)}
                               className="text-destructive"
-                              onClick={() =>
-                                handleDeleteWorkspace(
-                                  workspace.id,
-                                  workspace.name
-                                )
-                              }
                             >
+                              <Trash2 className="h-4 w-4 mr-2" />
                               Delete
                             </DropdownMenuItem>
                           )}
@@ -291,49 +334,37 @@ export default function WorkspacesPage() {
                       </DropdownMenu>
                     )}
                   </div>
-                </CardHeader>
-                <CardContent>
-                  {workspace.description && (
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {workspace.description}
-                    </p>
-                  )}
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Users className="h-3 w-3" />
-                      Member since{" "}
-                      {new Date(
-                        workspace.userRole.createdAt
-                      ).toLocaleDateString()}
-                    </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="mb-4">
+                  {workspace.description || "No description provided"}
+                </CardDescription>
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <div className="flex items-center space-x-1">
+                    <Users className="h-4 w-4" />
+                    <span>Team workspace</span>
                   </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                  <span>
+                    Created {new Date(workspace.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       ) : (
-        /* Empty State */
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-            <Building2 className="h-8 w-8 text-muted-foreground" />
-          </div>
+        <div className="text-center py-12">
+          <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">No workspaces yet</h3>
-          <p className="text-muted-foreground mb-6 max-w-md">
-            Create your first workspace to start organizing projects and
-            collaborating with your team.
+          <p className="text-muted-foreground mb-4">
+            Create your first workspace to get started with organizing your
+            projects.
           </p>
-          <Dialog
-            open={isCreateDialogOpen}
-            onOpenChange={setIsCreateDialogOpen}
-          >
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Your First Workspace
-              </Button>
-            </DialogTrigger>
-          </Dialog>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Workspace
+          </Button>
         </div>
       )}
 
@@ -353,7 +384,8 @@ export default function WorkspacesPage() {
                 <Input
                   id="edit-name"
                   name="name"
-                  defaultValue={editingWorkspace?.name || ""}
+                  value={editName}
+                  onChange={(e) => handleEditNameChange(e.target.value)}
                   placeholder="Enter workspace name"
                   required
                 />
@@ -363,12 +395,16 @@ export default function WorkspacesPage() {
                 <Input
                   id="edit-slug"
                   name="slug"
-                  defaultValue={editingWorkspace?.slug || ""}
+                  value={editSlug}
+                  onChange={(e) => setEditSlug(e.target.value)}
                   placeholder="workspace-slug"
                   pattern="^[a-z0-9-]+$"
                   title="Only lowercase letters, numbers, and hyphens allowed"
                   required
                 />
+                <p className="text-xs text-muted-foreground">
+                  Auto-generated from workspace name. You can edit if needed.
+                </p>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="edit-description">Description (Optional)</Label>
@@ -385,10 +421,7 @@ export default function WorkspacesPage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => {
-                  setIsEditDialogOpen(false);
-                  setEditingWorkspace(null);
-                }}
+                onClick={() => setIsEditDialogOpen(false)}
               >
                 Cancel
               </Button>
@@ -402,6 +435,29 @@ export default function WorkspacesPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              workspace "{workspaceToDelete?.name}" and all associated projects
+              and data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteWorkspace}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete Workspace
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
