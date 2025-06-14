@@ -14,13 +14,7 @@ import {
   Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,6 +41,7 @@ import {
   useDeleteWorkspace,
 } from "@/hooks";
 import { toast } from "sonner";
+import type { WorkspaceWithRole } from "@/lib/types";
 
 const roleIcons = {
   OWNER: Crown,
@@ -72,7 +67,8 @@ export default function WorkspacesPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [editingWorkspace, setEditingWorkspace] = useState<any>(null);
+  const [editingWorkspace, setEditingWorkspace] =
+    useState<WorkspaceWithRole | null>(null);
 
   const handleCreateWorkspace = async (formData: FormData) => {
     setIsCreating(true);
@@ -143,7 +139,7 @@ export default function WorkspacesPage() {
     }
   };
 
-  const openEditDialog = (workspace: any) => {
+  const openEditDialog = (workspace: WorkspaceWithRole) => {
     setEditingWorkspace(workspace);
     setIsEditDialogOpen(true);
   };

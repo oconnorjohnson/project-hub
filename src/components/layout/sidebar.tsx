@@ -5,18 +5,6 @@ import { usePathname } from "next/navigation";
 import { Plus, Home, Settings, FolderOpen, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import {
-  useWorkspaces,
-  useCurrentWorkspace,
-  useSwitchWorkspace,
-} from "@/hooks";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: Home },
