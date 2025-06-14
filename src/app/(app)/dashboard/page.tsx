@@ -16,11 +16,13 @@ import {
   Calendar,
   TrendingUp,
   Loader2,
+  CheckSquare,
 } from "lucide-react";
 import Link from "next/link";
 import { useProjects, useWorkspaces } from "@/hooks";
 import { useAtom } from "jotai";
 import { currentWorkspaceAtom } from "@/lib/stores/workspace";
+import { CreateTaskDialog } from "@/components/tasks/create-task-dialog";
 
 export default function DashboardPage() {
   const [currentWorkspace] = useAtom(currentWorkspaceAtom);
@@ -114,6 +116,46 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Quick Actions */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Quick Actions</CardTitle>
+          <CardDescription>
+            Common actions to help you stay productive
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button asChild className="h-auto p-4 flex-col gap-2">
+              <Link href="/projects">
+                <Plus className="h-6 w-6" />
+                <span>New Project</span>
+              </Link>
+            </Button>
+
+            <CreateTaskDialog
+              trigger={
+                <Button variant="outline" className="h-auto p-4 flex-col gap-2">
+                  <CheckSquare className="h-6 w-6" />
+                  <span>Add Task</span>
+                </Button>
+              }
+            />
+
+            <Button
+              asChild
+              variant="outline"
+              className="h-auto p-4 flex-col gap-2"
+            >
+              <Link href="/calendar">
+                <Calendar className="h-6 w-6" />
+                <span>View Calendar</span>
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Recent Projects */}
       {stats.recentProjects.length > 0 ? (
