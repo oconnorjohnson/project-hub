@@ -5,7 +5,6 @@ import {
   Plus,
   Building2,
   Users,
-  Settings,
   Trash2,
   Edit,
   MoreHorizontal,
