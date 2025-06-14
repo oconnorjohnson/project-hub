@@ -8,6 +8,7 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { WorkspaceSwitcher } from "@/components/workspace-switcher";
 
 export function Topbar() {
   return (
@@ -23,6 +24,7 @@ export function Topbar() {
           <SignUpButton />
         </SignedOut>
         <SignedIn>
+          <WorkspaceSwitcher />
           <UserButton />
         </SignedIn>
       </div>

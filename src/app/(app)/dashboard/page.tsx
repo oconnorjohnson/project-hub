@@ -19,9 +19,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useProjects, useWorkspaces } from "@/hooks";
+import { useAtom } from "jotai";
+import { currentWorkspaceAtom } from "@/lib/stores/workspace";
 
 export default function DashboardPage() {
-  const { data: projects, isLoading: projectsLoading } = useProjects();
+  const [currentWorkspace] = useAtom(currentWorkspaceAtom);
+  const { data: projects, isLoading: projectsLoading } = useProjects(
+    currentWorkspace?.id
+  );
   const { data: workspaces, isLoading: workspacesLoading } = useWorkspaces();
 
   const isLoading = projectsLoading || workspacesLoading;

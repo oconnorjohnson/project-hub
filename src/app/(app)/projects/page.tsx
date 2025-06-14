@@ -47,12 +47,13 @@ import {
   useWorkspaces,
   useCreateProject,
   useCreateWorkspace,
-  useCurrentWorkspace,
 } from "@/hooks";
 import { toast } from "sonner";
+import { useAtom } from "jotai";
+import { currentWorkspaceAtom } from "@/lib/stores/workspace";
 
 export default function ProjectsPage() {
-  const { data: currentWorkspace } = useCurrentWorkspace();
+  const [currentWorkspace] = useAtom(currentWorkspaceAtom);
   const { data: projects, isLoading: projectsLoading } = useProjects(
     currentWorkspace?.id
   );
@@ -66,6 +67,9 @@ export default function ProjectsPage() {
   const [isCreatingWorkspace, setIsCreatingWorkspace] = useState(false);
 
   const isLoading = projectsLoading || workspacesLoading;
+
+  // Don't allow project creation if no workspace is selected
+  const canCreateProject = currentWorkspace !== null;
 
   const handleCreateWorkspace = async (formData: FormData) => {
     setIsCreatingWorkspace(true);
@@ -149,95 +153,97 @@ export default function ProjectsPage() {
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button disabled={!canCreateProject}>
               <Plus className="h-4 w-4 mr-2" />
               New Project
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <form action={handleCreateProject}>
-              <DialogHeader>
-                <DialogTitle>Create New Project</DialogTitle>
-                <DialogDescription>
-                  Add a new project to organize your work and collaborate with
-                  your team.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Project Name</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    placeholder="Enter project name"
-                    required
-                  />
+          {canCreateProject ? (
+            <DialogContent className="sm:max-w-[425px]">
+              <form action={handleCreateProject}>
+                <DialogHeader>
+                  <DialogTitle>Create New Project</DialogTitle>
+                  <DialogDescription>
+                    Add a new project to organize your work and collaborate with
+                    your team.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Project Name</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      placeholder="Enter project name"
+                      required
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="slug">Project Slug</Label>
+                    <Input
+                      id="slug"
+                      name="slug"
+                      placeholder="project-slug"
+                      pattern="^[a-z0-9-]+$"
+                      title="Only lowercase letters, numbers, and hyphens allowed"
+                      required
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="workspaceId">Workspace</Label>
+                    <Select
+                      name="workspaceId"
+                      required
+                      defaultValue={currentWorkspace?.id}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select workspace" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {workspaces?.map((workspace) => (
+                          <SelectItem key={workspace.id} value={workspace.id}>
+                            {workspace.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="description">Description (Optional)</Label>
+                    <Textarea
+                      id="description"
+                      name="description"
+                      placeholder="Describe your project..."
+                      rows={3}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="tags">Tags (Optional)</Label>
+                    <Input
+                      id="tags"
+                      name="tags"
+                      placeholder="frontend, design, urgent (comma-separated)"
+                    />
+                  </div>
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="slug">Project Slug</Label>
-                  <Input
-                    id="slug"
-                    name="slug"
-                    placeholder="project-slug"
-                    pattern="^[a-z0-9-]+$"
-                    title="Only lowercase letters, numbers, and hyphens allowed"
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="workspaceId">Workspace</Label>
-                  <Select
-                    name="workspaceId"
-                    required
-                    defaultValue={currentWorkspace?.id}
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsCreateDialogOpen(false)}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select workspace" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {workspaces?.map((workspace) => (
-                        <SelectItem key={workspace.id} value={workspace.id}>
-                          {workspace.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="description">Description (Optional)</Label>
-                  <Textarea
-                    id="description"
-                    name="description"
-                    placeholder="Describe your project..."
-                    rows={3}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="tags">Tags (Optional)</Label>
-                  <Input
-                    id="tags"
-                    name="tags"
-                    placeholder="frontend, design, urgent (comma-separated)"
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsCreateDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isCreating}>
-                  {isCreating && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Create Project
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isCreating}>
+                    {isCreating && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Create Project
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          ) : null}
         </Dialog>
 
         {/* Workspace Creation Dialog */}

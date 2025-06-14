@@ -2,15 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Plus,
-  Home,
-  Settings,
-  FolderOpen,
-  Building2,
-  ChevronDown,
-  Check,
-} from "lucide-react";
+import { Plus, Home, Settings, FolderOpen, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -35,9 +27,6 @@ const navigation = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { data: workspaces } = useWorkspaces();
-  const { data: currentWorkspace } = useCurrentWorkspace();
-  const { mutate: switchWorkspace } = useSwitchWorkspace();
 
   return (
     <div className="flex flex-col w-64 bg-card border-r">
@@ -45,53 +34,6 @@ export function Sidebar() {
       <div className="p-4 border-b">
         <h2 className="text-lg font-semibold">Project Hub</h2>
       </div>
-
-      {/* Workspace Switcher */}
-      {workspaces && workspaces.length > 0 && (
-        <div className="p-4 border-b">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-full justify-between">
-                <div className="flex items-center gap-2">
-                  <Building2 className="h-4 w-4" />
-                  <span className="truncate">
-                    {currentWorkspace?.name ||
-                      workspaces[0]?.name ||
-                      "Select Workspace"}
-                  </span>
-                </div>
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="start">
-              {workspaces.map((workspace) => (
-                <DropdownMenuItem
-                  key={workspace.id}
-                  onClick={() => switchWorkspace(workspace.id)}
-                  className="flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4" />
-                    <span>{workspace.name}</span>
-                  </div>
-                  {(currentWorkspace?.id === workspace.id ||
-                    (!currentWorkspace &&
-                      workspaces[0]?.id === workspace.id)) && (
-                    <Check className="h-4 w-4" />
-                  )}
-                </DropdownMenuItem>
-              ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/workspaces">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Manage Workspaces
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )}
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2">
