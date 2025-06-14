@@ -1,14 +1,11 @@
-import { createClient } from "@supabase/supabase-js";
-import { drizzle } from "drizzle-orm/supabase";
+import { config } from "dotenv";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import * as schema from "./schema";
 
-// Create Supabase client with service role key for server-side operations
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+config({ path: ".env.local" });
 
-// Create drizzle instance
-export const db = drizzle(supabase, { schema });
+const client = postgres(process.env.DATABASE_URL!);
+export const db = drizzle(client, { schema });
 
 export * from "./schema";
