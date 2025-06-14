@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTasks } from "@/hooks/use-tasks";
 import { TaskStatus, TaskPriority } from "@/lib/types";
+import { CreateTaskDialog } from "@/components/tasks/create-task-dialog";
 
 const getStatusColor = (status: TaskStatus) => {
   switch (status) {
@@ -115,10 +116,7 @@ export default function CalendarPage() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Task
-          </Button>
+          <CreateTaskDialog />
         </div>
       </div>
 
