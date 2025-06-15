@@ -6,10 +6,10 @@ import { eq, and, gt } from "drizzle-orm";
 // POST /api/documents/[id]/lock - Acquire lock
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const documentId = params.id;
+    const { id: documentId } = await params;
 
     // For now, we'll use a simple session identifier
     // In a real app, this would come from authentication
@@ -89,10 +89,10 @@ export async function POST(
 // DELETE /api/documents/[id]/lock - Release lock
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const documentId = params.id;
+    const { id: documentId } = await params;
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get("sessionId");
 
@@ -146,10 +146,10 @@ export async function DELETE(
 // GET /api/documents/[id]/lock - Check lock status
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const documentId = context.params.id;
+    const { id: documentId } = await params;
 
     // Check for active lock
     const [lock] = await db

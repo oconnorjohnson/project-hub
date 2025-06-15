@@ -7,10 +7,10 @@ import { UpdateDocumentData, JSONContent } from "@/lib/types";
 // GET /api/documents/[id] - Get single document
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const documentId = params.id;
+    const { id: documentId } = await params;
 
     const [document] = await db
       .select()
@@ -62,10 +62,10 @@ export async function GET(
 // PATCH /api/documents/[id] - Update document
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const documentId = params.id;
+    const { id: documentId } = await params;
     const body: UpdateDocumentData = await request.json();
 
     // Check if document exists
@@ -149,10 +149,10 @@ export async function PATCH(
 // DELETE /api/documents/[id] - Delete document
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const documentId = params.id;
+    const { id: documentId } = await params;
 
     // Check if document exists
     const [existingDocument] = await db
