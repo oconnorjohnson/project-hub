@@ -9,6 +9,7 @@ import {
   FolderOpen,
   Building2,
   Calendar,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,7 @@ import { cn } from "@/lib/utils";
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: Home },
   { name: "Calendar & Tasks", href: "/calendar", icon: Calendar },
+  { name: "Documents", href: "/documents", icon: FileText },
   { name: "Projects", href: "/projects", icon: FolderOpen },
   { name: "Workspaces", href: "/workspaces", icon: Building2 },
   { name: "Settings", href: "/settings", icon: Settings },
