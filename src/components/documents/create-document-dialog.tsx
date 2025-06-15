@@ -152,7 +152,7 @@ export function CreateDocumentDialog({
                 <SelectValue placeholder="Select a project or leave global" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Global Document</SelectItem>
+                <SelectItem value="global">Global Document</SelectItem>
                 {/* TODO: Add project options from useProjects hook */}
                 <SelectItem value="placeholder">Sample Project</SelectItem>
               </SelectContent>
