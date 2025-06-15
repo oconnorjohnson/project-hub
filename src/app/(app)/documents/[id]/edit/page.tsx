@@ -95,8 +95,10 @@ export default function DocumentEditPage() {
 
       await updateDocument({
         id: documentId,
-        title: title.trim(),
-        content: tipTapContent,
+        data: {
+          title: title.trim(),
+          content: tipTapContent,
+        },
       });
 
       setHasUnsavedChanges(false);
