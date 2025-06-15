@@ -593,23 +593,25 @@ function ProjectTasksSection({ projectId }: { projectId: string }) {
                     <h4 className="font-medium">{task.title}</h4>
                     <Badge
                       className={getStatusColor(
-                        (task.metadata as any)?.status || "TODO"
+                        (task.metadata as { status?: string })?.status || "TODO"
                       )}
                     >
-                      {(task.metadata as any)?.status || "TODO"}
+                      {(task.metadata as { status?: string })?.status || "TODO"}
                     </Badge>
                     <Badge
                       className={getPriorityColor(
-                        (task.metadata as any)?.priority || "MEDIUM"
+                        (task.metadata as { priority?: string })?.priority ||
+                          "MEDIUM"
                       )}
                     >
-                      {(task.metadata as any)?.priority || "MEDIUM"}
+                      {(task.metadata as { priority?: string })?.priority ||
+                        "MEDIUM"}
                     </Badge>
                   </div>
 
-                  {(task.content as any)?.description && (
+                  {(task.content as { description?: string })?.description && (
                     <p className="text-sm text-muted-foreground">
-                      {(task.content as any).description}
+                      {(task.content as { description?: string }).description}
                     </p>
                   )}
 
@@ -617,11 +619,11 @@ function ProjectTasksSection({ projectId }: { projectId: string }) {
                     <span>
                       Created {new Date(task.createdAt).toLocaleDateString()}
                     </span>
-                    {(task.metadata as any)?.dueDate && (
+                    {(task.metadata as { dueDate?: string })?.dueDate && (
                       <span>
                         Due{" "}
                         {new Date(
-                          (task.metadata as any).dueDate
+                          (task.metadata as { dueDate?: string }).dueDate!
                         ).toLocaleDateString()}
                       </span>
                     )}

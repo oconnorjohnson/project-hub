@@ -4,7 +4,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api";
 import {
   Document,
-  DocumentWithProject,
   DocumentWithLock,
   CreateDocumentData,
   UpdateDocumentData,
@@ -149,7 +148,7 @@ export function useDocumentLock(documentId: string) {
   });
 
   const acquireLock = useMutation({
-    mutationFn: async (): Promise<any> => {
+    mutationFn: async (): Promise<DocumentLockStatus> => {
       const response = await apiClient(`/documents/${documentId}/lock`, {
         method: "POST",
       });
@@ -194,11 +193,11 @@ export function useDocumentLock(documentId: string) {
 }
 
 // Auto-save hook for document content
-export function useAutoSaveDocument(documentId: string, enabled = true) {
+export function useAutoSaveDocument(documentId: string) {
   const { mutateAsync: updateDocument } = useUpdateDocument();
 
   const autoSave = useMutation({
-    mutationFn: async (content: any) => {
+    mutationFn: async (content: Record<string, unknown>) => {
       return updateDocument({
         id: documentId,
         data: { content },

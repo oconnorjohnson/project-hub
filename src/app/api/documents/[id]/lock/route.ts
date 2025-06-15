@@ -146,7 +146,7 @@ export async function DELETE(
 // GET /api/documents/[id]/lock - Check lock status
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const documentId = params.id;

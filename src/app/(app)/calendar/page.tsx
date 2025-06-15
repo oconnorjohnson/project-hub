@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, Kanban, Filter, Plus } from "lucide-react";
+import { Calendar, Kanban, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -36,23 +36,6 @@ export default function CalendarPage() {
     console.log("Date clicked:", date);
   };
 
-  const getStatusColor = (status: TaskStatus) => {
-    switch (status) {
-      case "TODO":
-        return "bg-gray-100 text-gray-800 border-gray-200";
-      case "IN_PROGRESS":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "IN_REVIEW":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "DONE":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "CANCELLED":
-        return "bg-red-100 text-red-800 border-red-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
   const getPriorityColor = (priority: TaskPriority) => {
     switch (priority) {
       case "LOW":
@@ -71,16 +54,20 @@ export default function CalendarPage() {
   const tasksByStatus = {
     TODO: tasks.filter(
       (task) =>
-        (task.metadata as any)?.status === "TODO" ||
-        !(task.metadata as any)?.status
+        (task.metadata as { status?: TaskStatus })?.status === "TODO" ||
+        !(task.metadata as { status?: TaskStatus })?.status
     ),
     IN_PROGRESS: tasks.filter(
-      (task) => (task.metadata as any)?.status === "IN_PROGRESS"
+      (task) =>
+        (task.metadata as { status?: TaskStatus })?.status === "IN_PROGRESS"
     ),
     IN_REVIEW: tasks.filter(
-      (task) => (task.metadata as any)?.status === "IN_REVIEW"
+      (task) =>
+        (task.metadata as { status?: TaskStatus })?.status === "IN_REVIEW"
     ),
-    DONE: tasks.filter((task) => (task.metadata as any)?.status === "DONE"),
+    DONE: tasks.filter(
+      (task) => (task.metadata as { status?: TaskStatus })?.status === "DONE"
+    ),
   };
 
   if (isLoading) {
@@ -170,16 +157,22 @@ export default function CalendarPage() {
                           </h4>
                           <Badge
                             className={getPriorityColor(
-                              (task.metadata as any)?.priority || "MEDIUM"
+                              (task.metadata as { priority?: TaskPriority })
+                                ?.priority || "MEDIUM"
                             )}
                           >
-                            {(task.metadata as any)?.priority || "MEDIUM"}
+                            {(task.metadata as { priority?: TaskPriority })
+                              ?.priority || "MEDIUM"}
                           </Badge>
                         </div>
 
-                        {(task.content as any)?.description && (
+                        {(task.content as { description?: string })
+                          ?.description && (
                           <p className="text-xs text-muted-foreground line-clamp-2">
-                            {(task.content as any).description}
+                            {
+                              (task.content as { description?: string })
+                                .description
+                            }
                           </p>
                         )}
 
@@ -187,11 +180,11 @@ export default function CalendarPage() {
                           <span>
                             {new Date(task.createdAt).toLocaleDateString()}
                           </span>
-                          {(task.metadata as any)?.dueDate && (
+                          {(task.metadata as { dueDate?: string })?.dueDate && (
                             <span>
                               Due{" "}
                               {new Date(
-                                (task.metadata as any).dueDate
+                                (task.metadata as { dueDate?: string }).dueDate!
                               ).toLocaleDateString()}
                             </span>
                           )}

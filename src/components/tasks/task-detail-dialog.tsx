@@ -110,8 +110,12 @@ export function TaskDetailDialog({
     }
   };
 
-  const taskMetadata = task.metadata as any;
-  const taskContent = task.content as any;
+  const taskMetadata = task.metadata as {
+    status?: TaskStatus;
+    priority?: TaskPriority;
+    dueDate?: string;
+  };
+  const taskContent = task.content as { description?: string };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

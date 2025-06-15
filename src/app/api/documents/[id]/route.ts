@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { documents, documentLocks } from "@/lib/db/schema";
 import { eq, and, gt } from "drizzle-orm";
-import { UpdateDocumentData } from "@/lib/types";
+import { UpdateDocumentData, JSONContent } from "@/lib/types";
 
 // GET /api/documents/[id] - Get single document
 export async function GET(
@@ -108,7 +108,11 @@ export async function PATCH(
     }
 
     // Update the document
-    const updateData: any = {
+    const updateData: {
+      updatedAt: Date;
+      title?: string;
+      content?: JSONContent;
+    } = {
       updatedAt: new Date(),
     };
 

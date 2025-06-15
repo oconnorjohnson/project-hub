@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { documents, documentLocks } from "@/lib/db/schema";
+import { documents } from "@/lib/db/schema";
 import { eq, and, isNull, desc, asc, ilike, or } from "drizzle-orm";
 import { CreateDocumentData, DocumentFilters } from "@/lib/types";
 
@@ -13,8 +13,10 @@ export async function GET(request: NextRequest) {
       projectId: searchParams.get("projectId") || undefined,
       global: searchParams.get("global") === "true",
       search: searchParams.get("search") || undefined,
-      sortBy: (searchParams.get("sortBy") as any) || "updatedAt",
-      sortOrder: (searchParams.get("sortOrder") as any) || "desc",
+      sortBy:
+        (searchParams.get("sortBy") as "title" | "createdAt" | "updatedAt") ||
+        "updatedAt",
+      sortOrder: (searchParams.get("sortOrder") as "asc" | "desc") || "desc",
     };
 
     // Build the query
