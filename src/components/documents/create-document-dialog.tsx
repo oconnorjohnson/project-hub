@@ -39,7 +39,9 @@ export function CreateDocumentDialog({
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [selectedProjectId, setSelectedProjectId] = useState(projectId || "");
+  const [selectedProjectId, setSelectedProjectId] = useState(
+    projectId || "global"
+  );
   const [isCreating, setIsCreating] = useState(false);
 
   const { mutateAsync: createDocument } = useCreateDocument();
@@ -72,7 +74,8 @@ export function CreateDocumentDialog({
               ],
             }
           : undefined,
-        projectId: selectedProjectId || undefined,
+        projectId:
+          selectedProjectId === "global" ? undefined : selectedProjectId,
       };
 
       const newDocument = await createDocument(documentData);
@@ -83,7 +86,7 @@ export function CreateDocumentDialog({
       // Reset form
       setTitle("");
       setDescription("");
-      setSelectedProjectId(projectId || "");
+      setSelectedProjectId(projectId || "global");
 
       // Navigate to the new document
       router.push(`/documents/${newDocument.id}/edit`);
@@ -98,7 +101,7 @@ export function CreateDocumentDialog({
   const handleCancel = () => {
     setTitle("");
     setDescription("");
-    setSelectedProjectId(projectId || "");
+    setSelectedProjectId(projectId || "global");
     onOpenChange(false);
   };
 
