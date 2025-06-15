@@ -91,7 +91,7 @@ export default function DocumentEditPage() {
                 : [],
             })),
           }
-        : null;
+        : undefined;
 
       await updateDocument({
         id: documentId,
