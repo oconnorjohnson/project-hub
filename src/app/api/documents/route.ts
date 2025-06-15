@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { documents } from "@/lib/db/schema";
-import { eq, and, isNull, desc, asc, ilike, or } from "drizzle-orm";
+import { eq, isNull, desc } from "drizzle-orm";
 import { CreateDocumentData, DocumentFilters } from "@/lib/types";
 
 // GET /api/documents - List documents with filtering
